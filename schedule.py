@@ -11,26 +11,70 @@ def today_greeter():
           f"\nWhat are you going to do today?")
 
 
+def print_instructions():
+    """Displays the starting instructions of the program."""
+
+    instructions = "\nEnter 'q' at any time to quit."
+    instructions += "\nEnter the start time and end time of the activity."
+    instructions += "\n'Start time' must be earlier than the 'End time'."
+    instructions += "\nFor example, Start: 12:00 PM End: 4:30 PM\n"
+    print(instructions)
+
+
 def create_schedule():
     """Creates a dict with the hours of the day"""
 
-    schedule_dict = dict()
-    for i in range(47):
-        if i % 2 == 0:
-            x = {i: [f"{int(i / 2)}:00 - {int(i / 2)}:30", [None]]}
-        else:
-            x = {i: [f"{int((i - 1) / 2)}:30 - {int((i + 1) / 2)}:00", [None]]}
+    s = datetime.datetime.strptime('12:00 AM', '%I:%M %p')
+    r = [s.strftime('%I:%M %p')]
+    for i in range(30, 60 * 24, 30):
+        r.append((s + datetime.timedelta(minutes=i)).strftime('%I:%M %p'))
 
-        schedule_dict.update(x)
+    schedule = {}
+    for i in range(len(r)):
+        try:
+            hours = {i: {r[i] + " - " + r[i + 1]: ""}}
+            schedule.update(hours)
+        except IndexError:
+            pass
 
-    return schedule_dict
+    return schedule
 
 
 def print_schedule(schedule):
-    """Displays the schedule"""
-    for key, values in schedule.items():
-        print(f"{key}. {values[0]}")
+    """Prints only the hours of the schedule."""
+    for value in schedule.values():
+        for hour in value:
+            print(hour)
 
+
+def add_activity(start, end, activity, schedule):
+    """Adds activities to the schedule
+
+    **start: indicates the starting time of activity.
+    **end: indicates the ending time of activity.
+    **activity: to be added to the schedule.
+    **schedule: the current version of the schedule.
+    """
+    # Get the starting hour.
+    for key, value in schedule.items():
+        for hour in value:
+            if hour.startswith(str(start)):
+                start = key
+
+    # Get the ending hour.
+    for key, value in schedule.items():
+        for hour in value:
+            if hour.endswith(str(end)):
+                end = key
+
+    # Update activity
+    index = (int(start), int(end + 1))
+    for key, value in schedule.items():
+        for hour in value:
+            if key in range(index[0], index[1]):
+                schedule[key][hour] = activity
+
+    return schedule
 
 def sim_update():
     """Simulates schedule update."""
@@ -41,13 +85,22 @@ def sim_update():
 
 name = input('Welcome to "The Daily Scheduler", What is your name? ')
 today_greeter()
-print("\nEnter 'q' at any time to quit.")
-print('Select an option from 1 to 24 to add activities.')
-print('Begin hour must be earlier than the End hour.\n')
-time.sleep(7)
+print_instructions()
 
 schedule = create_schedule()
 c_schedule = schedule.copy()
-print_schedule(schedule)
+print_schedule(c_schedule)
 
-begins, ends = [], []
+while True:
+    start = input('\nStart: ')
+    end = input('End: ')
+
+    # Adds activity to the schedule.
+    print(f"You selected {start} - {end}\n")
+    activity = input(("Which activity would you like "
+                      "to add to the schedule? "))
+
+    add_activity(start, end, activity, c_schedule)
+
+
+
