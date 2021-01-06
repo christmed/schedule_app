@@ -10,6 +10,7 @@ def today_greeter():
     date = datetime.datetime.today().strftime('%d/%m/%Y')
     print(f"Hi {name}, today is: {day_of_week} | Date: {date}"
           f"\nWhat are you going to do today?")
+    time.sleep(2)
 
 
 def print_instructions():
@@ -20,6 +21,7 @@ def print_instructions():
     instructions += "\n'Start time' must be earlier than the 'End time'."
     instructions += "\nE.g. Start: 12:00 PM End: 04:30 PM\n"
     print(instructions)
+    time.sleep(5)
 
 
 def create_schedule():
@@ -52,7 +54,7 @@ def get_hour_key(schedule, searched_value, start=True):
     """Looks for the key hour that matches the searched value.
 
     **schedule: Current version of the schedule.
-    **start: determines the match method
+    **start: determines the match method.
     (startswith - endswith) of searched value.
     **searched_value: The substring to look up in hour options.
     """
@@ -72,7 +74,7 @@ def add_activity(schedule, activity, start_key, end_key):
     """Update activity.
 
     **schedule: Dict that will be updated.
-    **activity: String that will be added to hour key
+    **activity: String that will be added to hour key.
     **start_key: starting point of activity.
     **end_key: ending point of activity.
     """
@@ -105,8 +107,8 @@ def sim_update():
 def check_format(pattern, str):
     """Checks if pattern is a valid option.
 
-    **pattern:
-    **str:
+    **pattern: the substring to match.
+    **str: the string to look for the pattern.
     """
 
     matched = re.match(pattern, str)
@@ -146,11 +148,11 @@ while True:
         print(option_error)
         continue
 
-    # Adds activity to the schedule.
     print(f"\nYou selected {start} - {end}")
     activity = input(("Which activity would you like "
                       "to add to the schedule?\n "))
 
+    # Adds activity to the schedule.
     s_index = get_hour_key(c_schedule, start, True)
     e_index = get_hour_key(c_schedule, end, False)
     c_schedule = add_activity(c_schedule, activity, s_index, e_index)
