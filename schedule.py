@@ -48,33 +48,41 @@ def print_schedule(schedule):
             print(hour)
 
 
-def add_activity(start, end, activity, schedule):
-    """Adds activities to the schedule
+def get_hour_key(schedule, searched_value, start=True):
+    """Looks for the key hour that matches the searched value.
 
-    **start: indicates the starting time of activity.
-    **end: indicates the ending time of activity.
-    **activity: to be added to the schedule.
-    **schedule: the current version of the schedule.
+    **schedule: Current version of the schedule.
+    **start: determines the match method
+    (startswith - endswith) of searched value.
+    **searched_value: The substring to look up in hour options.
     """
 
     # Get the starting hour key.
     for key, value in schedule.items():
         for hour in value:
-            if hour.startswith(str(start)):
-                start = key
+            if start:
+                if hour.startswith(str(searched_value)):
+                    return key
+            else:
+                if hour.endswith(str(searched_value)):
+                    return key
 
-    # Get the ending hour key.
-    for key, value in schedule.items():
-        for hour in value:
-            if hour.endswith(str(end)):
-                end = key
 
-    # Update activity
-    index = (int(start), int(end + 1))
+def add_activity(schedule, activity, start_key, end_key):
+    """Update activity.
+
+    **schedule: Dict that will be updated.
+    **activity: String that will be added to hour key
+    **start_key: starting point of activity.
+    **end_key: ending point of activity.
+    """
+
+    index = (int(start_key), int(end_key + 1))
     for key, value in schedule.items():
         for hour in value:
             if key in range(index[0], index[1]):
                 schedule[key][hour] = activity
+
     return schedule
 
 
@@ -138,12 +146,14 @@ while True:
         print(option_error)
         continue
 
-
     # Adds activity to the schedule.
     print(f"\nYou selected {start} - {end}")
     activity = input(("Which activity would you like "
                       "to add to the schedule?\n "))
-    c_schedule = add_activity(start, end, activity, c_schedule)
+
+    s_index = get_hour_key(c_schedule, start, True)
+    e_index = get_hour_key(c_schedule, end, False)
+    c_schedule = add_activity(c_schedule, activity, s_index, e_index)
 
     # Shows only the changes made to the schedule.
     sim_update()
