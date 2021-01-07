@@ -13,15 +13,18 @@ def today_greeter():
     time.sleep(2)
 
 
-def print_instructions():
-    """Displays the starting instructions of the program."""
+def print_instructions(pause_time):
+    """Displays the starting instructions of the program.
+
+    **pause_time: time program will stop before it continues.
+    """
 
     instructions = "\nEnter 'q' at any time to quit."
     instructions += "\nEnter the start time and end time of the activity."
     instructions += "\n'Start time' must be earlier than the 'End time'."
     instructions += "\nE.g. Start: 12:00 PM End: 04:30 PM\n"
     print(instructions)
-    time.sleep(5)
+    time.sleep(pause_time)
 
 
 def create_schedule():
@@ -55,7 +58,7 @@ def get_hour_key(schedule, searched_value, start=True):
 
     **schedule: Current version of the schedule.
     **start: determines the match method.
-    (startswith - endswith) of searched value.
+        (startswith - endswith) of searched value.
     **searched_value: The substring to look up in hour options.
     """
 
@@ -89,6 +92,10 @@ def add_activity(schedule, activity, start_key, end_key):
 
 
 def show_current_changes(schedule):
+    """Show recent changes made to the schedule.
+    **schedule: current version of schedule.
+    """
+
     for value in c_schedule.values():
         for hr, act in value.items():
             if act != '':
@@ -117,16 +124,47 @@ def check_format(pattern, str):
     return is_match
 
 
+def continue_options():
+    """Displays set of instructions to decide what to do next."""
+
+    msg = "\nEnter 'c' to continue adding activities."
+    msg += "\nEnter 'm' to modify existing changes."
+    msg += "\nEnter 'd' when you're done adding activities."
+    msg += '\nWould you like to continue?'
+    print(msg)
+
+
+def continue_settings():
+    """"Displays continue options."""
+
+    while True:
+        msg = "\nWould you like to see the instructions once again?"
+        msg += "\nChoose an option from menu (1-3)"
+        msg += "\n\t1. Yes"
+        msg += "\n\t2. No"
+        msg += "\n\t3. NO, Never Ask Again!!"
+
+        print(msg)
+        setts_resp = input()
+        if setts_resp != '1' and setts_resp != '2' and setts_resp != '3':
+            print('Invalid option. Please try again.')
+            continue
+        else:
+            break
+    return setts_resp
+
+
 option_error = 'Please choose a valid option' \
       '\nE.g Start: 07:00 AM End: 02:00 PM'
 
 name = input('Welcome to "The Daily Scheduler", What is your name? ')
 today_greeter()
-print_instructions()
+print_instructions(5)
 
 schedule = create_schedule()
 c_schedule = schedule.copy()
 print_schedule(c_schedule)
+ask_again = False
 
 while True:
     start = input('\nStart: ')
@@ -134,7 +172,7 @@ while True:
         sys.exit()
 
     # Checks that format matches the schedule hours format.
-    pattern = re.compile(r"[0-1][0-9]\W[0-3][0]\s[APM]")
+    pattern = re.compile(r"[0-1][0-9]\W[03][0]\s[APM]")
     matched_pattern = check_format(pattern, start)
     if not matched_pattern:
         print(option_error)
@@ -160,3 +198,22 @@ while True:
     # Shows only the changes made to the schedule.
     sim_update()
     show_current_changes(c_schedule)
+    time.sleep(1.5)
+
+    continue_options()
+    continue_resp = input()
+
+    if continue_resp == 'q':
+        sys.exit()
+    elif continue_resp == 'c':
+        if ask_again:
+            continue
+        settings = continue_settings()
+        if settings == '1':
+            print_instructions(3)
+            continue
+        elif settings == '2':
+            continue
+        else:
+            ask_again = True
+            continue
