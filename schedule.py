@@ -178,24 +178,87 @@ def mod_instructions():
 
 def mod_menu(f_schedule):
     """Displays modify menu.
+
     **f_schedule: Complete version of schedule.
     """
 
-    print('Here is your schedule.')
+    print('Here is your schedule.\n')
     for key, value in f_schedule.items():
         for hr, act in value.items():
             print(f"{key}. {hr}\t\t{act}")
     time.sleep(3)
     mod_instructions()
 
-    mod_resp = input('\nWhich option(s) you wish to modify? ')
+    while True:
+        print('\nWhich option(s) you wish to modify?')
+        mod_resp = input('Option(s): ')
+        mod_resp, is_valid = check_mod_resp(mod_resp, f_schedule)
+
+        if is_valid:
+            break
 
     return mod_resp
 
 
-def check_mod_resp():
-    """Checks modify menu response to decide next step."""
+def check_mod_resp(mod_resp, schedule):
+    """Checks if option is valid.
 
+    **mod_resp: Response
+    """
+    not_valid_msg = 'Invalid option. Try again.'
+    if mod_resp == 'q':
+        sys.exit()
+
+    if not mod_resp.isdigit():
+        print(not_valid_msg)
+        return None, False
+
+    if 1 < len(mod_resp) <= 2:
+        if int(mod_resp) in schedule.keys():
+            return mod_resp, True
+        else:
+            print(not_valid_msg)
+            return None, False
+
+    if len(mod_resp) > 2:
+        if ',' in mod_resp:
+            mod_resp = mod_resp.split(',')
+            n_continuous = check_options(mod_resp, schedule)
+            if n_continuous:
+                return mod_resp, True
+            else:
+                return None, False
+        else:
+            mod_resp = tuple(mod_resp.split('-'))
+            continuous = check_options(mod_resp, schedule)
+            if continuous:
+                return mod_resp, True
+            else:
+                return None, False
+
+
+def check_options(mod_resp, schedule):
+    """Checks if all selected options are in schedule options.
+
+    **mod_response: The options to look for.
+    **schedule: the dict to look for the mod_response elements.
+    """
+
+    val_opt = []
+    for i in mod_resp:
+        if int(i) in schedule.keys():
+            val_opt.append(True)
+        else:
+            val_opt.append(False)
+
+    if all(val_opt):
+        return True
+    else:
+        return False
+
+
+def mod_activity():
+    return None
 
 
 option_error = 'Please choose a valid option' \
@@ -260,8 +323,8 @@ while True:
             continue
         elif settings == '2':
             continue
-        else:
+        elif settings == '3':
             ask_again = False
             continue
     elif continue_resp == 'm':
-        pass
+        schedule_opt = mod_menu(c_schedule)
