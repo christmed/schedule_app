@@ -127,10 +127,21 @@ def check_format(pattern, str):
 def continue_options():
     """Displays set of instructions to decide what to do next."""
 
-    msg = "\nEnter 'c' to continue adding activities."
+    msg = '\nWould you like to continue?'
+    msg += "\nEnter 'c' to continue adding activities."
     msg += "\nEnter 'm' to modify existing changes."
     msg += "\nEnter 'd' when you're done adding activities."
-    msg += '\nWould you like to continue?'
+    print(msg)
+
+
+def cont_instructions():
+    """Displays continue menu."""
+
+    msg = "\nWould you like to see the instructions once again?"
+    msg += "\nChoose an option from menu (1-3)"
+    msg += "\n\t1. Yes"
+    msg += "\n\t2. No"
+    msg += "\n\t3. NO, Never Ask Again!!"
     print(msg)
 
 
@@ -138,14 +149,11 @@ def continue_settings():
     """"Displays continue options."""
 
     while True:
-        msg = "\nWould you like to see the instructions once again?"
-        msg += "\nChoose an option from menu (1-3)"
-        msg += "\n\t1. Yes"
-        msg += "\n\t2. No"
-        msg += "\n\t3. NO, Never Ask Again!!"
-
-        print(msg)
+        cont_instructions()
         setts_resp = input()
+
+        if setts_resp == 'q':
+            break
         if setts_resp != '1' and setts_resp != '2' and setts_resp != '3':
             print('Invalid option. Please try again.')
             continue
@@ -154,8 +162,44 @@ def continue_settings():
     return setts_resp
 
 
+def mod_instructions():
+    """Displays instructions of modify menu"""
+
+    msg = "Read the instructions carefully."
+    msg += '\nEnter a digit from 0 to 46.'
+    msg += "\nTo choose non-continuous options, separate them with a ','."
+    msg += "\n\tE.g Option: 7,12,15,24\n"
+    msg += "\nTo choose continuous options, separate them with a '-'."
+    msg += "\n\tE.g Option: 24-27\n"
+    msg += "\nTo choose a single option. E.g Option: 40"
+    print(msg)
+    time.sleep(3)
+
+
+def mod_menu(f_schedule):
+    """Displays modify menu.
+    **f_schedule: Complete version of schedule.
+    """
+
+    print('Here is your schedule.')
+    for key, value in f_schedule.items():
+        for hr, act in value.items():
+            print(f"{key}. {hr}\t\t{act}")
+    time.sleep(3)
+    mod_instructions()
+
+    mod_resp = input('\nWhich option(s) you wish to modify? ')
+
+    return mod_resp
+
+
+def check_mod_resp():
+    """Checks modify menu response to decide next step."""
+
+
+
 option_error = 'Please choose a valid option' \
-      '\nE.g Start: 07:00 AM End: 02:00 PM'
+               '\nE.g Start: 07:00 AM End: 02:00 PM'
 
 name = input('Welcome to "The Daily Scheduler", What is your name? ')
 today_greeter()
@@ -164,7 +208,7 @@ print_instructions(5)
 schedule = create_schedule()
 c_schedule = schedule.copy()
 print_schedule(c_schedule)
-ask_again = False
+ask_again = True
 
 while True:
     start = input('\nStart: ')
@@ -206,14 +250,18 @@ while True:
     if continue_resp == 'q':
         sys.exit()
     elif continue_resp == 'c':
-        if ask_again:
+        if not ask_again:
             continue
         settings = continue_settings()
+        if settings == 'q':
+            sys.exit()
         if settings == '1':
             print_instructions(3)
             continue
         elif settings == '2':
             continue
         else:
-            ask_again = True
+            ask_again = False
             continue
+    elif continue_resp == 'm':
+        pass
