@@ -98,7 +98,7 @@ def show_current_changes(schedule):
 
     for value in c_schedule.values():
         for hr, act in value.items():
-            if act != '':
+            if act != '' and not act.isspace():
                 print(f"{hr}\t\t{act}")
             else:
                 pass
@@ -204,7 +204,9 @@ def check_mod_resp(mod_resp, schedule):
     """Checks if option is valid.
 
     **mod_resp: Response
+    **schedule:
     """
+
     not_valid_msg = 'Invalid option. Try again.'
     if mod_resp == 'q':
         sys.exit()
@@ -238,7 +240,8 @@ def check_mod_resp(mod_resp, schedule):
 
 
 def check_options(mod_resp, schedule):
-    """Checks if all selected options are in schedule options.
+    """Checks if all selected (continuous, non-continuous)
+    options are in schedule options.
 
     **mod_response: The options to look for.
     **schedule: the dict to look for the mod_response elements.
@@ -257,8 +260,30 @@ def check_options(mod_resp, schedule):
         return False
 
 
-def mod_activity():
-    return None
+def mod_schedule(schedule, sch_opts):
+    """Modifies schedule.
+
+    **schedule: current version of schedule.
+    **sch_options: options to be modified.
+    """
+
+    print("Press 'Enter' on your keyboard to delete activities.")
+    n_activity = input('New activity: ')
+
+    if sch_opts is list:
+        for i in sch_opts:
+            for key, value in schedule.items():
+                for hr, act in value.items():
+                    if key == int(i):
+                        schedule[key][hr] = n_activity
+    else:
+        for i in range(int((sch_opts[0])), int((sch_opts[1])) + 1):
+            for key, value in schedule.items():
+                for hr, act in value.items():
+                    if key == i:
+                        schedule[key][hr] = n_activity
+
+    return schedule
 
 
 option_error = 'Please choose a valid option' \
@@ -328,3 +353,4 @@ while True:
             continue
     elif continue_resp == 'm':
         schedule_opt = mod_menu(c_schedule)
+        c_schedule = mod_schedule(c_schedule, schedule_opt)
