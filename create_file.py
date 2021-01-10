@@ -1,7 +1,7 @@
 import xlsxwriter
 import csv
 
-
+# It needs some changes to make it work.
 class File:
 
     def __init__(self, filename, schedule):

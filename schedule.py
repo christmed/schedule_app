@@ -134,7 +134,12 @@ def continue_opts():
     print(msg)
 
 def continue_menu(schedule, ask_again):
-    """whatever"""
+    """Displays main continue menu and checks answer.
+
+    **schedule: current version of schedule
+    **ask_again: settings chose by user of function
+    cont_sub_menu_instr():
+    """
 
     while True:
         continue_opts()
@@ -158,7 +163,7 @@ def continue_menu(schedule, ask_again):
             continue
 
 def cont_sub_menu_instr():
-    """Displays continue menu."""
+    """Displays continue sub-menu."""
 
     msg = "\nWould you like to see the instructions once again?"
     msg += "\nChoose an option from menu (1-3)"
