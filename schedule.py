@@ -10,7 +10,7 @@ def today_greeter():
     date = datetime.datetime.today().strftime('%d/%m/%Y')
     print(f"Hi {name}, today is: {day_of_week} | Date: {date}"
           f"\nWhat are you going to do today?")
-    time.sleep(2)
+    time.sleep(1)
 
 
 def print_instructions(pause_time):
@@ -136,6 +136,26 @@ def continue_opts():
 def continue_menu(schedule, ask_again):
     """whatever"""
 
+    while True:
+        continue_opts()
+        continue_resp = input()
+
+        if continue_resp == 'q':
+            sys.exit()
+        elif continue_resp == 'c':
+            if ask_again:
+                ask_again = check_subc_setts()
+            return schedule, ask_again
+        elif continue_resp == 'm':
+            schedule_opt = mod_sub_menu(schedule)
+            schedule = mod_schedule(schedule, schedule_opt)
+            return schedule, ask_again
+        # Still working on 'done' menu.
+        elif continue_resp == 'd':
+            pass
+        else:
+            print(invalid_msg)
+            continue
 
 def cont_sub_menu_instr():
     """Displays continue menu."""
@@ -172,7 +192,7 @@ def check_subc_setts():
     if settings == 'q':
         sys.exit()
     if settings == '1':
-        print_instructions(3)
+        print_instructions(1)
         return True
     elif settings == '2':
         return True
@@ -191,7 +211,7 @@ def mod_instr():
     msg += "\n\tE.g Option: 24-27"
     msg += "\nTo choose a single option. E.g Option: 40"
     print(msg)
-    time.sleep(3)
+    time.sleep(1)
 
 
 def mod_sub_menu(f_schedule):
@@ -204,7 +224,7 @@ def mod_sub_menu(f_schedule):
     for key, value in f_schedule.items():
         for hr, act in value.items():
             print(f"{key}. {hr}\t\t{act}")
-    time.sleep(3)
+    time.sleep(1)
     mod_instr()
 
     while True:
@@ -310,7 +330,7 @@ invalid_msg = 'Invalid option Please try again'
 
 name = input('Welcome to "The Daily Scheduler", What is your name? ')
 today_greeter()
-print_instructions(5)
+print_instructions(1)
 
 schedule = create_schedule()
 c_schedule = schedule.copy()
@@ -351,21 +371,4 @@ while True:
     show_current_changes(c_schedule)
     time.sleep(1.5)
 
-    continue_opts()
-    continue_resp = input()
-
-    if continue_resp == 'q':
-        sys.exit()
-    elif continue_resp == 'c':
-        if not ask_again:
-            continue
-        ask_again = check_subc_setts()
-    elif continue_resp == 'm':
-        schedule_opt = mod_sub_menu(c_schedule)
-        c_schedule = mod_schedule(c_schedule, schedule_opt)
-    elif continue_resp == 'd':
-        pass
-    else:
-        print(invalid_msg)
-
-        # What to do next.
+    c_schedule, ask_again = continue_menu(c_schedule, ask_again)
