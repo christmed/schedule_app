@@ -357,7 +357,7 @@ while True:
     end = input('End: ')
     if end == 'q':
         sys.exit()
-    matched_pattern = check_format(pattern, start)
+    matched_pattern = check_format(pattern, end)
     if not matched_pattern:
         print(option_error)
         continue
