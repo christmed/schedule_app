@@ -124,7 +124,7 @@ def check_format(pattern, str):
     return is_match
 
 
-def continue_options():
+def continue_opts():
     """Displays set of instructions to decide what to do next."""
 
     msg = '\nWould you like to continue?'
@@ -133,8 +133,11 @@ def continue_options():
     msg += "\nEnter 'd' when you're done adding activities."
     print(msg)
 
+def continue_menu(schedule, ask_again):
+    """whatever"""
 
-def cont_instructions():
+
+def cont_sub_menu_instr():
     """Displays continue menu."""
 
     msg = "\nWould you like to see the instructions once again?"
@@ -145,38 +148,53 @@ def cont_instructions():
     print(msg)
 
 
-def continue_settings():
+def cont_sub_setts():
     """"Displays continue options."""
 
     while True:
-        cont_instructions()
+        cont_sub_menu_instr()
         setts_resp = input()
 
         if setts_resp == 'q':
-            break
+            sys.exit()
         if setts_resp != '1' and setts_resp != '2' and setts_resp != '3':
-            print('Invalid option. Please try again.')
+            print(invalid_msg)
             continue
         else:
             break
     return setts_resp
 
 
-def mod_instructions():
+def check_subc_setts():
+    """Saves continue sub-menu settings chose by user."""
+
+    settings = cont_sub_setts()
+    if settings == 'q':
+        sys.exit()
+    if settings == '1':
+        print_instructions(3)
+        return True
+    elif settings == '2':
+        return True
+    elif settings == '3':
+        return False
+
+
+def mod_instr():
     """Displays instructions of modify menu"""
 
-    msg = "Read the instructions carefully."
+    msg = "\nRead the instructions carefully."
     msg += '\nEnter a digit from 0 to 46.'
     msg += "\nTo choose non-continuous options, separate them with a ','."
-    msg += "\n\tE.g Option: 7,12,15,24\n"
+    msg += "\n\tE.g Option: 7,12,15,24"
     msg += "\nTo choose continuous options, separate them with a '-'."
-    msg += "\n\tE.g Option: 24-27\n"
+    msg += "\n\tE.g Option: 24-27"
     msg += "\nTo choose a single option. E.g Option: 40"
     print(msg)
     time.sleep(3)
 
 
-def mod_menu(f_schedule):
+def mod_sub_menu(f_schedule):
     """Displays modify menu.
 
     **f_schedule: Complete version of schedule.
@@ -187,7 +205,7 @@ def mod_menu(f_schedule):
         for hr, act in value.items():
             print(f"{key}. {hr}\t\t{act}")
     time.sleep(3)
-    mod_instructions()
+    mod_instr()
 
     while True:
         print('\nWhich option(s) you wish to modify?')
@@ -207,39 +225,38 @@ def check_mod_resp(mod_resp, schedule):
     **schedule:
     """
 
-    not_valid_msg = 'Invalid option. Try again.'
     if mod_resp == 'q':
         sys.exit()
 
     if not mod_resp.isdigit():
-        print(not_valid_msg)
+        print(invalid_msg)
         return None, False
 
     if 1 < len(mod_resp) <= 2:
         if int(mod_resp) in schedule.keys():
             return mod_resp, True
         else:
-            print(not_valid_msg)
+            print(invalid_msg)
             return None, False
 
     if len(mod_resp) > 2:
         if ',' in mod_resp:
             mod_resp = mod_resp.split(',')
-            n_continuous = check_options(mod_resp, schedule)
+            n_continuous = check_mod_opts(mod_resp, schedule)
             if n_continuous:
                 return mod_resp, True
             else:
                 return None, False
         else:
             mod_resp = tuple(mod_resp.split('-'))
-            continuous = check_options(mod_resp, schedule)
+            continuous = check_mod_opts(mod_resp, schedule)
             if continuous:
                 return mod_resp, True
             else:
                 return None, False
 
 
-def check_options(mod_resp, schedule):
+def check_mod_opts(mod_resp, schedule):
     """Checks if all selected (continuous, non-continuous)
     options are in schedule options.
 
@@ -267,7 +284,7 @@ def mod_schedule(schedule, sch_opts):
     **sch_options: options to be modified.
     """
 
-    print("Press 'Enter' on your keyboard to delete activities.")
+    print("\nPress 'Enter' on your keyboard to delete activities.")
     n_activity = input('New activity: ')
 
     if sch_opts is list:
@@ -282,12 +299,14 @@ def mod_schedule(schedule, sch_opts):
                 for hr, act in value.items():
                     if key == i:
                         schedule[key][hr] = n_activity
+    sim_update()
 
     return schedule
 
 
 option_error = 'Please choose a valid option' \
                '\nE.g Start: 07:00 AM End: 02:00 PM'
+invalid_msg = 'Invalid option Please try again'
 
 name = input('Welcome to "The Daily Scheduler", What is your name? ')
 today_greeter()
@@ -332,7 +351,7 @@ while True:
     show_current_changes(c_schedule)
     time.sleep(1.5)
 
-    continue_options()
+    continue_opts()
     continue_resp = input()
 
     if continue_resp == 'q':
@@ -340,17 +359,13 @@ while True:
     elif continue_resp == 'c':
         if not ask_again:
             continue
-        settings = continue_settings()
-        if settings == 'q':
-            sys.exit()
-        if settings == '1':
-            print_instructions(3)
-            continue
-        elif settings == '2':
-            continue
-        elif settings == '3':
-            ask_again = False
-            continue
+        ask_again = check_subc_setts()
     elif continue_resp == 'm':
-        schedule_opt = mod_menu(c_schedule)
+        schedule_opt = mod_sub_menu(c_schedule)
         c_schedule = mod_schedule(c_schedule, schedule_opt)
+    elif continue_resp == 'd':
+        pass
+    else:
+        print(invalid_msg)
+
+        # What to do next.
