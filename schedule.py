@@ -2,6 +2,7 @@ import datetime
 import time
 import sys
 import re
+from create_file import File
 
 
 def today_greeter():
@@ -157,7 +158,7 @@ def continue_menu(schedule, ask_again):
             return schedule, ask_again
         # Still working on 'done' menu.
         elif continue_resp == 'd':
-            pass
+            get_file_fmt()
         else:
             print(invalid_msg)
             continue
@@ -329,6 +330,52 @@ def mod_schedule(schedule, sch_opts):
     return schedule
 
 
+def get_file_fmt():
+    """Gets file format to save it later."""
+
+    while True:
+        format = input('\nSave schedule as (format):\n'
+                       '- txt\n'
+                       '- xlsx\n'
+                       '- csv\n'
+                       )
+        if format != 'txt' and format != 'xlsx' and format != 'csv':
+            print(invalid_msg)
+            continue
+        else:
+            break
+
+    return format
+
+
+def save_file(schedule):
+    """Save file as: format.
+
+    **returns filename to then send it to user's email."""
+
+    while True:
+        date = datetime.datetime.today().strftime('%d-%m-%Y')
+        format = get_file_fmt()
+        filename = f"{date} schedule.{format}"
+
+        if format == 'txt':
+            save_file = File(filename, schedule)
+            save_file.txt_file()
+        elif format == 'xlsx':
+            save_file = File(filename, schedule)
+            save_file.xlsx_file()
+        elif format == 'csv':
+            save_file = File(filename, schedule)
+            save_file.csv_file()
+        elif format == 'q':
+            sys.exit()
+        else:
+            print('Invalid option. Try again.')
+            continue
+
+        return filename
+
+
 option_error = 'Please choose a valid option' \
                '\nE.g Start: 07:00 AM End: 02:00 PM'
 invalid_msg = 'Invalid option Please try again'
@@ -377,3 +424,4 @@ while True:
     time.sleep(1.5)
 
     c_schedule, ask_again = continue_menu(c_schedule, ask_again)
+
