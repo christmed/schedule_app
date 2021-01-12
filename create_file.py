@@ -14,12 +14,10 @@ class File:
         filename = self.filename
         schedule = self.schedule
         with open(filename, 'w') as f:
-            f.write("\tHOURS\t\t\t\tACTIVITIES\n")
-            for i in range(1, 25):
-                if i < 10:
-                    f.write(f"{schedule[i].replace('  ', ' ').replace('- ', '-  ')}\n")
-                else:
-                    f.write(f"{schedule[i]}\n")
+            f.write("\t\tHOURS\t\t\t\tACTIVITIES\n")
+            for key, value in schedule.items():
+                for hr, act in value.items():
+                    f.write(f"{hr}\t\t{act}\n")
 
     def xlsx_file(self):
         """Creates a xlsx file."""
@@ -29,17 +27,20 @@ class File:
         workbook = xlsxwriter.Workbook(filename)
         worksheet = workbook.add_worksheet("Schedule")
 
-        new_list = []
-        for v in schedule.values():
-            new_list.append([v[:18], v[19:]])
-
         row = 0
         column = 0
 
-        for hour, activity in new_list:
-            worksheet.write(row, column, hour)
-            worksheet.write(row, column + 1, activity)
-            row += 1
+        headers = ['HOURS', 'ACTIVITIES']
+        worksheet._write(row, column, headers[0])
+        worksheet._write(row, column + 1, headers[1])
+
+        row += 1
+
+        for key, value in schedule.items():
+            for hr, act in value.items():
+                worksheet.write(row, column, hr)
+                worksheet.write(row, column + 1, act)
+                row += 1
 
         workbook.close()
 
@@ -48,16 +49,16 @@ class File:
 
         filename = self.filename
         schedule = self.schedule
-        with open(filename, 'w') as f:
-            fields = ['hour', 'activity']
+
+        # Flattens dict.
+        new_dict = []
+        for key, value in schedule.items():
+            for hr, act in value.items():
+                row = {'HOUR': hr, 'ACTIVITY': act}
+                new_dict.append(row)
+
+        with open(filename, 'w', newline='') as f:
+            fields = ['HOUR', 'ACTIVITY']
             writer = csv.DictWriter(f, fieldnames=fields)
             writer.writeheader()
-
-            writer = csv.writer(f)
-
-            for v in schedule.values():
-                if len(v) == 18:
-                    row = {f" {v[:19].lstrip()}": v[19:]}
-                else:
-                    row = {v[:19]: v[19:]}
-                writer.writerow(row)
+            writer.writerows(new_dict)

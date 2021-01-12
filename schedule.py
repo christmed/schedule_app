@@ -369,9 +369,6 @@ def save_file(schedule):
             save_file.csv_file()
         elif format == 'q':
             sys.exit()
-        else:
-            print('Invalid option. Try again.')
-            continue
 
         return filename
 
