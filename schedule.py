@@ -134,6 +134,7 @@ def continue_opts():
     msg += "\nEnter 'd' when you're done adding activities."
     print(msg)
 
+
 def continue_menu(schedule, ask_again):
     """Displays main continue menu and checks answer.
 
@@ -158,10 +159,13 @@ def continue_menu(schedule, ask_again):
             return schedule, ask_again
         # Still working on 'done' menu.
         elif continue_resp == 'd':
-            get_file_fmt()
+            filename = save_file(c_schedule)
+            email = get_email(schedule)
+            sys.exit()
         else:
             print(invalid_msg)
             continue
+
 
 def cont_sub_menu_instr():
     """Displays continue sub-menu."""
@@ -373,6 +377,43 @@ def save_file(schedule):
         return filename
 
 
+def get_email(schedule):
+    """Gets user email.
+
+    **schedule: final version of schedule.
+    """
+
+    valid_email = False
+    while valid_email:
+        rcv_email = input('Would you like to receive the schedule on your email? (y/n)')
+        if rcv_email == 'y':
+            email = input('Enter email: ')
+            valid_email = verify_email(email)
+        elif rcv_email == 'n':
+            print_schedule(schedule)
+            sys.exit()
+        else:
+            print(invalid_msg)
+            continue
+
+    return email
+
+
+def verify_email(email):
+    """Verify emails format."""
+
+    # Create email regex.
+    email_regex = re.compile(r'''(
+    [a-zA-Z0-9._%+-]+   # username
+    @                   # @ symbol
+    [a-zA-Z0-9.-]+      # domain name
+    (\.[a-zA-Z]{2,4})   # dot-something 
+    )''', re.VERBOSE)
+
+    is_match = re.match(email_regex, email)
+    return bool(is_match)
+
+
 option_error = 'Please choose a valid option' \
                '\nE.g Start: 07:00 AM End: 02:00 PM'
 invalid_msg = 'Invalid option Please try again'
@@ -421,4 +462,3 @@ while True:
     time.sleep(1.5)
 
     c_schedule, ask_again = continue_menu(c_schedule, ask_again)
-
