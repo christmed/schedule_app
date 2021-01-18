@@ -3,6 +3,9 @@ import time
 import sys
 import re
 from create_file import File
+import smtplib
+import os
+from email.message import EmailMessage
 
 
 def today_greeter():
@@ -96,7 +99,7 @@ def show_current_changes(schedule):
     """Show recent changes made to the schedule.
     **schedule: current version of schedule.
     """
-
+    print('Here is your schedule\n')
     for value in c_schedule.values():
         for hr, act in value.items():
             if act != '' and not act.isspace():
@@ -109,7 +112,7 @@ def sim_update():
     """Simulates schedule update."""
     print('\nUpdating schedule...')
     time.sleep(1)
-    print('Done\n')
+    print('Done!\n')
 
 
 def check_format(pattern, str):
@@ -156,11 +159,12 @@ def continue_menu(schedule, ask_again):
         elif continue_resp == 'm':
             schedule_opt = mod_sub_menu(schedule)
             schedule = mod_schedule(schedule, schedule_opt)
+            show_current_changes(schedule)
             return schedule, ask_again
-        # Still working on 'done' menu.
         elif continue_resp == 'd':
             filename = save_file(c_schedule)
             email = get_email(schedule)
+            send_email(email, filename, name)
             sys.exit()
         else:
             print(invalid_msg)
@@ -243,9 +247,7 @@ def mod_sub_menu(f_schedule):
         mod_resp, is_valid = check_mod_resp(mod_resp, f_schedule)
 
         if is_valid:
-            break
-
-    return mod_resp
+            return mod_resp
 
 
 def check_mod_resp(mod_resp, schedule):
@@ -257,10 +259,6 @@ def check_mod_resp(mod_resp, schedule):
 
     if mod_resp == 'q':
         sys.exit()
-
-    if not mod_resp.isdigit():
-        print(invalid_msg)
-        return None, False
 
     if 1 < len(mod_resp) <= 2:
         if int(mod_resp) in schedule.keys():
@@ -338,7 +336,7 @@ def get_file_fmt():
     """Gets file format to save it later."""
 
     while True:
-        format = input('\nSave schedule as (format):\n'
+        format = input('\nChoose a format to save your schedule:\n'
                        '- txt\n'
                        '- xlsx\n'
                        '- csv\n'
@@ -383,20 +381,20 @@ def get_email(schedule):
     **schedule: final version of schedule.
     """
 
-    valid_email = False
-    while valid_email:
-        rcv_email = input('Would you like to receive the schedule on your email? (y/n)')
+    while True:
+        rcv_email = input('Would you like to receive the schedule on your email? (y/n) ')
         if rcv_email == 'y':
             email = input('Enter email: ')
-            valid_email = verify_email(email)
+            check_mail = verify_email(email)
+            if check_mail:
+                return email
         elif rcv_email == 'n':
-            print_schedule(schedule)
+            print('Here is your schedule\n')
+            print_schedule(c_schedule)
             sys.exit()
         else:
             print(invalid_msg)
             continue
-
-    return email
 
 
 def verify_email(email):
@@ -412,6 +410,35 @@ def verify_email(email):
 
     is_match = re.match(email_regex, email)
     return bool(is_match)
+
+
+def send_email(email, filename, name):
+
+    email_address = os.environ.get('email_user')
+    email_password = os.environ.get('email_pass')
+
+    msg = EmailMessage()
+    msg['Subject'] = 'Daily Schedule'
+    msg['From'] = email_address
+    msg['To'] = email
+    msg.set_content(f"Hello {name}, this is your schedule of today.\n"
+                    f"Have a nice day!")
+
+    with open(filename, 'rb') as f:
+        file_data = f.read()
+        file_name = f.name
+    msg.add_attachment(file_data, maintype="application",
+                       subtype='octet-stream', filename=file_name)
+
+    with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+
+        smtp.login(email_address, email_password)
+
+        smtp.send_message(msg)
+        print('Email successfully sent.')
 
 
 option_error = 'Please choose a valid option' \
@@ -447,13 +474,17 @@ while True:
         print(option_error)
         continue
 
+    s_index = get_hour_key(c_schedule, start, True)
+    e_index = get_hour_key(c_schedule, end, False)
+    if s_index > e_index:
+        print("'Start hour' must be earlier than 'End hour'.")
+        continue
+
     print(f"\nYou selected {start} - {end}")
     activity = input(("Which activity would you like "
                       "to add to the schedule?\n "))
 
     # Adds activity to the schedule.
-    s_index = get_hour_key(c_schedule, start, True)
-    e_index = get_hour_key(c_schedule, end, False)
     c_schedule = add_activity(c_schedule, activity, s_index, e_index)
 
     # Shows only the changes made to the schedule.
